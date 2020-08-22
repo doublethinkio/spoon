@@ -1,0 +1,77 @@
+{
+  "version": "0.1.0",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "bin": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "engines": {
+    "node": ">=10"
+  },
+  "scripts": {
+    "start": "tsdx watch",
+    "build": "tsdx build",
+    "test": "tsdx test --passWithNoTests",
+    "lint": "tsdx lint",
+    "prepare": "npm-run-all -s build banner",
+    "banner": "node ./scripts/banner.js",
+    "demo": "node ./dist/index.js"
+  },
+  "peerDependencies": {
+    "react": ">=16"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "tsdx lint"
+    }
+  },
+  "name": "spoon",
+  "description": "A CLI program that proxys Scoop Cli, which uses gh-proxy to expedite downloading the Github Release file",
+  "author": "doublethinkio",
+  "module": "dist/spoon.esm.js",
+  "devDependencies": {
+    "@reactivex/rxjs": "^6.6.2",
+    "@types/bluebird": "^3.5.32",
+    "@types/download": "^6.2.4",
+    "@types/fs-extra": "^9.0.1",
+    "@types/is-url": "^1.2.28",
+    "@types/react": "^16.9.46",
+    "@types/react-dom": "^16.9.8",
+    "@types/url-join": "^4.0.0",
+    "@types/walk": "^2.3.0",
+    "chalk": "^4.1.0",
+    "husky": "^4.2.5",
+    "ink-testing-library": "^2.0.1",
+    "jest-transform-stub": "^2.0.0",
+    "npm-run-all": "^4.1.5",
+    "react": "^16.13.1",
+    "react-devtools": "^4.8.2",
+    "react-dom": "^16.13.1",
+    "tsdx": "^0.13.2",
+    "tslib": "^2.0.1",
+    "typescript": "^3.9.7"
+  },
+  "dependencies": {
+    "atomic-sleep": "^1.0.0",
+    "bluebird": "^3.7.2",
+    "conf": "^7.1.2",
+    "download": "^8.0.0",
+    "fs-extra": "^9.0.1",
+    "got": "^11.5.2",
+    "immer": "^7.0.7",
+    "ink": "^3.0.3",
+    "ink-divider": "^2.0.1",
+    "ink-link": "^2.0.0",
+    "is-url": "^1.2.4",
+    "meow": "^7.1.0",
+    "pretty-bytes": "^5.3.0",
+    "rxjs": "^6.6.2",
+    "url-join": "^4.0.1",
+    "use-immer": "^0.4.1",
+    "walk": "^2.3.14",
+    "walker": "^1.0.7"
+  }
+}
