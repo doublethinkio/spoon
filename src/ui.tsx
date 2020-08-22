@@ -21,7 +21,6 @@ import path from 'path'
 import urlJoin from 'url-join'
 import { ProgressBar } from './component'
 import Link from 'ink-link'
-import sleep from 'atomic-sleep'
 import prettyBytes from 'pretty-bytes'
 import chalk from 'chalk'
 
@@ -102,7 +101,6 @@ const App: React.FC<Props> = ({ url }): React.ReactElement => {
           const regex = /^(?:https?:\/\/)?github\.com\/.+?\/.+?\/(?:releases|archive)\/.*$/i
           const isGithubReleasesUrl = urls.every((it) => regex.test(it))
           if (isGithubReleasesUrl) {
-            await sleep(3e3)
             await PowerShell.execute('scoop update scoop')
 
             const cacheDir = scoop.path.local.cache!
@@ -128,17 +126,14 @@ const App: React.FC<Props> = ({ url }): React.ReactElement => {
                 stream.removeAllListeners('end')
               }
             } else {
-              await sleep(3e3)
               await PowerShell.execute(command)
               return exit()
             }
           } else {
-            await sleep(3e3)
             await PowerShell.execute(command)
             return exit()
           }
         } else {
-          await sleep(3e3)
           await PowerShell.execute(command)
           return exit()
         }
@@ -159,7 +154,6 @@ const App: React.FC<Props> = ({ url }): React.ReactElement => {
       const argv = purifyArgv()
       const command = `scoop ${argv.join(' ')}`
 
-      await sleep(3e3)
       await PowerShell.execute(command)
 
       return exit()

@@ -18,7 +18,14 @@ const cli = meow(
 	Examples
 	  $ spoon --url='${defaultGhProxyUrl}'
     gh-proxy server address has been set to ${defaultGhProxyUrl} successfully!
-`
+`,
+  {
+    flags: {
+      url: {
+        type: 'string',
+      },
+    },
+  }
 )
 
 const app = render(React.createElement(App, cli.flags))
