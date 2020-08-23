@@ -1,4 +1,8 @@
-import { spawn, ChildProcessWithoutNullStreams } from 'child_process'
+import {
+  spawn,
+  ChildProcessWithoutNullStreams,
+  SpawnOptionsWithoutStdio,
+} from 'child_process'
 import { EventEmitter } from 'events'
 import { EOL } from 'os'
 
@@ -35,7 +39,10 @@ class PowerShell extends EventEmitter {
   }
 
   public static async execute(
-    command: string
+    command: string,
+    options?: {
+      spawnOptions?: SpawnOptionsWithoutStdio
+    }
   ): Promise<number | NodeJS.Signals> {
     return await new Promise((resolve, reject) => {
       const powershell = spawn(
@@ -49,6 +56,7 @@ class PowerShell extends EventEmitter {
         ],
         {
           stdio: ['ignore', 'inherit', 'inherit'],
+          ...options?.spawnOptions,
         }
       )
 
@@ -60,6 +68,31 @@ class PowerShell extends EventEmitter {
         reject(error)
       })
     })
+  }
+  public static executeSync(
+    command: string,
+    options?: {
+      spawnOptions?: SpawnOptionsWithoutStdio
+    }
+  ): void {
+    spawn(
+      'powershell.exe',
+      [
+        '-NoLogo',
+        '-NoExit',
+        '-ExecutionPolicy',
+        'ByPass',
+        '-Command',
+        `& { ${command} }`,
+      ],
+      {
+        stdio: ['ignore', 'ignore', 'ignore'],
+        shell: true,
+        detached: true,
+        windowsHide: true,
+        ...options?.spawnOptions,
+      }
+    ).unref()
   }
 
   constructor(options?: Partial<Options>) {

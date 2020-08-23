@@ -31,10 +31,16 @@ const App: React.FC<Props> = ({ url }): React.ReactElement => {
   const url_ = url === 'default' ? defaultGhProxyUrl : url ?? conf.get('url')
   const { status, value: hasScoop_, error } = useAsync(hasScoop)
   const { exit } = useApp()
-  const [progress, setProgress] = useImmer<Progress | null>(null)
-  const percent = progress?.percent ?? 0
+  const [progress, setProgress] = useImmer<
+    Array<
+      Progress & {
+        fileName: string
+      }
+    >
+  >([])
+  const isCompleted =
+    progress.length > 0 && progress.every((it) => it.percent === 1)
   const [isFirst, toggleIsFirst] = useState(true)
-  const [app, setApp] = useState('')
   const [info, setInfo] = useState<JSX.Element | null>(null)
 
   useEffect(() => {
@@ -96,7 +102,6 @@ const App: React.FC<Props> = ({ url }): React.ReactElement => {
       try {
         if (isInstallAction) {
           const manifest = await getAppManifest(app)
-          setApp(app)
           const urls = toArray(getAppDownloadUrl(manifest))
           const regex = /^(?:https?:\/\/)?github\.com\/.+?\/.+?\/(?:releases|archive)\/.*$/i
           const isGithubReleasesUrl = urls.every((it) => regex.test(it))
@@ -104,31 +109,44 @@ const App: React.FC<Props> = ({ url }): React.ReactElement => {
             await PowerShell.execute('scoop update scoop')
 
             const cacheDir = scoop.path.local.cache!
-            const filename = await getAppCacheFileName(
-              app,
-              manifest.version,
-              urls[0]
-            )
 
-            if (!fs.pathExistsSync(path.join(cacheDir, filename))) {
-              const stream = (download(urlJoin(url_, urls[0]), cacheDir, {
-                filename,
-              }) as unknown) as ReturnType<GotStream>
+            const installApp = async (
+              url: string,
+              index: number,
+              urls: Array<string>
+            ) => {
+              const isLast = url === urls[urls.length - 1]
+              const baseFileName = path.basename(new URL(url).pathname)
+              const cacheFileName = await getAppCacheFileName(
+                app,
+                manifest.version,
+                url
+              )
 
-              stream.on('downloadProgress', (progress: Progress) => {
-                setProgress(() => {
-                  return progress
+              if (!fs.pathExistsSync(path.join(cacheDir, cacheFileName))) {
+                const stream = (download(urlJoin(url_, url), cacheDir, {
+                  filename: cacheFileName,
+                }) as unknown) as ReturnType<GotStream>
+
+                stream.on('downloadProgress', (progress: Progress) => {
+                  setProgress((progress_) => {
+                    progress_[index] = { ...progress, fileName: baseFileName }
+                  })
                 })
-              })
 
-              return () => {
-                stream.removeAllListeners('downloadProgress')
-                stream.removeAllListeners('end')
+                return () => {
+                  stream.removeAllListeners('downloadProgress')
+                  stream.removeAllListeners('end')
+                }
+              } else {
+                if (isLast) {
+                  await PowerShell.execute(command)
+                  return exit()
+                }
               }
-            } else {
-              await PowerShell.execute(command)
-              return exit()
             }
+
+            urls.map(installApp)
           } else {
             await PowerShell.execute(command)
             return exit()
@@ -148,7 +166,7 @@ const App: React.FC<Props> = ({ url }): React.ReactElement => {
   }, [exit, hasScoop_, setProgress, url, isFirst, url_])
 
   useEffect(() => {
-    if (percent !== 1) return void 0
+    if (!isCompleted) return void 0
 
     async function execute() {
       const argv = purifyArgv()
@@ -166,7 +184,7 @@ const App: React.FC<Props> = ({ url }): React.ReactElement => {
     }
 
     return void 0
-  }, [exit, percent])
+  }, [exit, isCompleted])
 
   return useMemo(
     () => (
@@ -174,38 +192,37 @@ const App: React.FC<Props> = ({ url }): React.ReactElement => {
         <Box>
           <Text color="blue">{info}</Text>
         </Box>
-        {progress && (
-          <Box>
-            <Box width="100%">
-              <Box>
-                <Text color="blue">Downloading {app}: </Text>
-              </Box>
-              <Box flexBasis="30%" marginLeft={2}>
-                <ProgressBar percent={progress.percent} />
-              </Box>
-              <Box justifyContent="space-between">
-                <Box marginLeft={2}>
-                  <Text color="green">
-                    percent: {getPercentage(progress.percent)}
-                  </Text>
+        {progress.length > 0 &&
+          progress.map((it, index) => (
+            <Box key={index}>
+              <Box width="100%">
+                <Box>
+                  <Text color="blue">Downloading {it.fileName}: </Text>
                 </Box>
-                <Box marginLeft={2}>
-                  <Text color="blue">
-                    total: {prettyBytes(progress.total!)}
-                  </Text>
+                <Box flexBasis="30%" marginLeft={2}>
+                  <ProgressBar percent={it.percent} />
                 </Box>
-                <Box marginLeft={2}>
-                  <Text color="blue">
-                    completed: {prettyBytes(progress.transferred!)}
-                  </Text>
+                <Box justifyContent="space-between">
+                  <Box marginLeft={2}>
+                    <Text color="green">
+                      percent: {getPercentage(it.percent)}
+                    </Text>
+                  </Box>
+                  <Box marginLeft={2}>
+                    <Text color="blue">total: {prettyBytes(it.total!)}</Text>
+                  </Box>
+                  <Box marginLeft={2}>
+                    <Text color="blue">
+                      completed: {prettyBytes(it.transferred!)}
+                    </Text>
+                  </Box>
                 </Box>
               </Box>
             </Box>
-          </Box>
-        )}
+          ))}
       </Box>
     ),
-    [app, info, progress]
+    [info, progress]
   )
 }
 
