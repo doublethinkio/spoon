@@ -30,9 +30,7 @@ export async function hasScoop(): Promise<boolean> {
 
   const result = await powershell.write(`scoop which scoop`)
 
-  return (
-    result.trim() === `${scoop.path.local.apps}\\scoop\\current\\bin\\scoop.ps1`
-  )
+  return result.trim().includes('scoop.ps1')
 }
 
 /**
