@@ -8769,10 +8769,10 @@ url-to-options@^1.0.1:
   resolved "https://registry.npm.taobao.org/url-to-options/download/url-to-options-1.0.1.tgz#1505a03a289a48cbd7a434efbaeec5055f5633a9"
   integrity sha1-FQWgOiiaSMvXpDTvuu7FBV9WM6k=
 
-use-immer@^0.4.1:
-  version "0.4.1"
-  resolved "https://registry.npm.taobao.org/use-immer/download/use-immer-0.4.1.tgz#82a372e666496bfd49750673be78c17fcd375ca8"
-  integrity sha1-gqNy5mZJa/1JdQZzvnjBf803XKg=
+use-immer@^0.5.0:
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/use-immer/-/use-immer-0.5.1.tgz#3862ebbb194ebfe66b8eb221082c2fb2585f8fe1"
+  integrity sha512-Orb7PokM+jiLQfA1oJ3B3P7Guq0c2IxUHHmBpLeEMnJiz4ZOMlj9mkqq6D7iXJsnurRX0EOB134annf3RjEWHw==
 
 use@^3.1.0:
   version "3.1.1"
